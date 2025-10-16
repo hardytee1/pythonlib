@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -28,11 +29,21 @@ class StartOptions:
 
 
 def _run_ray_subprocess(*args: str) -> None:
-    """Invoke the Ray CLI via `python -m ray ...` and stream output."""
-    command = [sys.executable, "-m", "ray", *args]
+    """Invoke the Ray CLI and stream output."""
+    ray_executable = shutil.which("ray")
+    command = [ray_executable, *args] if ray_executable else [sys.executable, "-m", "ray", *args]
+
     try:
         subprocess.run(command, check=True)
-    except subprocess.CalledProcessError as exc:  # pragma: no cover - bubble up context for CLI
+        return
+    except FileNotFoundError:
+        fallback = [sys.executable, "-m", "ray", *args]
+        try:
+            subprocess.run(fallback, check=True)
+            return
+        except subprocess.CalledProcessError as exc:  # pragma: no cover - bubble up context for CLI
+            raise CommandExecutionError(f"Ray command failed: {' '.join(fallback)}") from exc
+    except subprocess.CalledProcessError as exc:
         raise CommandExecutionError(f"Ray command failed: {' '.join(command)}") from exc
 
 
