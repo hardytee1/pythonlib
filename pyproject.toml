@@ -8,7 +8,7 @@ description = "Convenience CLI for launching Ray clusters and deploying LLMs."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "ray[serve]==2.46.0",
+    "ray[serve,llm]>=2.46.0",
 ]
 dynamic = ["version"]
 
@@ -28,6 +28,13 @@ version = { attr = "dillema.__version__" }
 
 [project.scripts]
 dillema = "dillema.cli:main"
+
+[project.optional-dependencies]
+llm = [
+    "vllm>=0.7.2",
+    "xgrammar==0.1.11",
+    "pynvml==12.0.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -10,7 +10,13 @@ To install the project, you can use pip:
 pip install .
 ```
 
-Make sure you have Python 3.9–3.12 and a working CUDA stack if you plan to deploy GPU-backed models.
+This pulls in Ray with the Serve and LLM extras. If you plan to run GPU-backed deployments with vLLM, add the optional extras:
+
+```bash
+pip install .[llm]
+```
+
+Make sure you have Python 3.9–3.12 and a working CUDA/NVIDIA stack before deploying GPU models.
 
 ## Usage
 
