@@ -59,7 +59,7 @@ def start_cluster(options: StartOptions) -> None:
     if not options.address:
         raise ValueError("--address is required when starting a worker node")
 
-    _run_ray_subprocess("start", "--worker", f"--address={options.address}")
+    _run_ray_subprocess("start", f"--address='{options.address}'")
 
 
 def show_status() -> None:
