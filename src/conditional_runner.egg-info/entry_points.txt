@@ -1,0 +1,2 @@
+[console_scripts]
+conditional-runner = conditional_runner.cli:main

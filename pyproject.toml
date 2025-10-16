@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dillema"
+description = "Convenience CLI for launching Ray clusters and deploying LLMs."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "ray[serve]==2.46.0",
+]
+dynamic = ["version"]
+
+authors = [
+    { name = "Your Name", email = "your.email@example.com" },
+]
+license = { text = "MIT" }
+
+[project.urls]
+Homepage = "https://github.com/yourusername/dillema"
+
+[tool.setuptools]
+license-files = ["LICENSE"]
+
+[tool.setuptools.dynamic]
+version = { attr = "dillema.__version__" }
+
+[project.scripts]
+dillema = "dillema.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["dillema*"]
+exclude = ["tests*", "docs", "build", "temp*"]

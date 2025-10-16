@@ -1,0 +1,45 @@
+Metadata-Version: 2.4
+Name: conditional-runner
+Version: 0.1.0
+Summary: A Python library that executes a sequence of commands based on conditional logic.
+Author-email: Your Name <your.email@example.com>
+License: MIT
+Project-URL: Homepage, https://github.com/yourusername/conditional-runner
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
+
+# Conditional Runner
+
+This project provides a simple command runner that executes a sequence of commands based on conditional logic. It is designed to be easily extensible and customizable for various use cases.
+
+## Installation
+
+To install the project, you can use pip:
+
+```bash
+pip install .
+```
+
+Make sure you have Python 3.12.9 or higher installed.
+
+## Usage
+
+To run the command sequence, use the installed CLI:
+
+```bash
+conditional-runner start
+```
+
+Add `--condition` to skip the prompt, for example:
+
+```bash
+conditional-runner start --condition first
+```
+
+You can customize the commands in the `src/conditional_runner/commands.py` file to suit your needs.
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for more details.
