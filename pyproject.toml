@@ -10,6 +10,7 @@ requires-python = ">=3.9"
 dependencies = [
     "ray[serve,llm]==2.46.0",
     "botocore>=1.30.0",
+    "vllm==0.7.2",
 ]
 dynamic = ["version"]
 
@@ -32,7 +33,6 @@ dillema = "dillema.cli:main"
 
 [project.optional-dependencies]
 llm = [
-    "vllm>=0.7.2",
     "xgrammar==0.1.11",
     "pynvml==12.0.0",
 ]
