@@ -8,7 +8,6 @@ description = "Convenience CLI for launching Ray clusters and deploying LLMs."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    # core package has no heavy runtime deps; extras are available below
 ]
 dynamic = ["version"]
 
@@ -48,6 +47,7 @@ chatbot = [
     "jinja2==3.1.6",
     "python-dotenv==1.0.1",
     "aiofiles==24.1.0",
+    "alembic==1.15.1",
 ]
 
 [tool.setuptools.packages.find]
