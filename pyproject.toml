@@ -8,9 +8,7 @@ description = "Convenience CLI for launching Ray clusters and deploying LLMs."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "ray[serve,llm]>=2.43.0",
-    "botocore>=1.30.0",
-    "vllm>=0.7.2",
+    # core package has no heavy runtime deps; extras are available below
 ]
 dynamic = ["version"]
 
@@ -32,9 +30,20 @@ version = { attr = "dillema.__version__" }
 dillema = "dillema.cli:main"
 
 [project.optional-dependencies]
+# Extra for running/deploying LLMs (heavy deps installed only when requested)
 llm = [
+    "ray[serve,llm]>=2.43.0",
+    "vllm==0.7.2",
+    "botocore>=1.30.0",
     "xgrammar==0.1.11",
     "pynvml==12.0.0",
+]
+
+# Extra for chatbot/web UI related dependencies (lighter-weight; does NOT install ray/vllm)
+chatbot = [
+    "fastapi>=0.95.0",
+    "uvicorn[standard]>=0.20.0",
+    "requests>=2.28.0",
 ]
 
 [tool.setuptools.packages.find]
