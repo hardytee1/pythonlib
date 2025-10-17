@@ -66,6 +66,32 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 ragforge_dir = repo_root / "apps" / "RAGforge"
                 web_cwd = ragforge_dir if ragforge_dir.exists() and ragforge_dir.is_dir() else repo_root
 
+                env_file = web_cwd / ".env"
+                default_env = (
+                    'OPENAI_API_KEY="any"\n'
+                    'HUGGINGFACE_API_KEY="any"\n'
+                    '# Postgres - Active\n'
+                    'POSTGRES_SERVER="localhost"\n'
+                    "POSTGRES_PORT=5432\n"
+                    "POSTGRES_DB=mydb\n"
+                    'POSTGRES_USER="myuser"\n'
+                    'POSTGRES_PASSWORD="mypassword"\n'
+                )
+                try:
+                    env_file.write_text(default_env, encoding="utf-8")
+                    print(f"Ensured default environment file at {env_file}")
+                except OSError as env_exc:
+                    print(f"Warning: could not write {env_file}: {env_exc}")
+
+                if env_file.exists():
+                    print(f"Loading environment from {env_file}")
+                    try:
+                        from dotenv import load_dotenv
+
+                        load_dotenv(dotenv_path=str(env_file), override=True)
+                    except ImportError:
+                        print("Warning: python-dotenv not installed; skipping .env loading")
+
                 # 1) docker compose up -d (run in web_cwd so Dockerfile/docker-compose in apps/RAGforge is used)
                 if not getattr(args, "no_docker", False):
                     try:
