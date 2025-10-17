@@ -15,16 +15,22 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     parser = argparse.ArgumentParser(prog="dillema", description="Convenient wrappers around the Ray CLI and Serve APIs")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    start_parser = subparsers.add_parser("start", help="Start a Ray head or worker node")
-    role_group = start_parser.add_mutually_exclusive_group(required=True)
+    start_parser = subparsers.add_parser("start", help="Start a Ray head or worker node or run the web app")
+    role_group = start_parser.add_mutually_exclusive_group(required=False)
     role_group.add_argument("--head", action="store_true", help="Start the Ray head node with dashboard enabled")
     role_group.add_argument("--worker", action="store_true", help="Start a Ray worker node that joins an existing cluster")
+    start_parser.add_argument("--web", action="store_true", help="Run the bundled FastAPI web app (equivalent to uvicorn app.main:app --host/--port)")
     start_parser.add_argument("--address", help="Ray head address the worker should join (required for --worker)")
     start_parser.add_argument(
         "--dashboard-host",
         default="0.0.0.0",
         help="Host interface for the Ray dashboard when starting the head node",
     )
+    start_parser.add_argument("--web-host", default="0.0.0.0", help="Host for the web server if --web is used")
+    start_parser.add_argument("--web-port", type=int, default=8000, help="Port for the web server if --web is used")
+    start_parser.add_argument("--no-docker", action="store_true", help="Skip running `docker compose up -d` before starting web")
+    start_parser.add_argument("--no-migrate", action="store_true", help="Skip running `alembic upgrade head` before starting web")
+    start_parser.add_argument("--no-npm-build", action="store_true", help="Skip running `npm run build` after starting web")
 
     subparsers.add_parser("status", help="Show the current Ray cluster status")
 
@@ -46,6 +52,60 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
 
     try:
         if args.command == "start":
+            # If --web was requested, run the FastAPI app instead of starting Ray
+            if getattr(args, "web", False):
+                # Run optional preparatory steps, then launch the FastAPI app via uvicorn,
+                # and finally run the frontend build.
+                import subprocess
+                import shlex
+
+                # 1) docker compose up -d
+                if not getattr(args, "no_docker", False):
+                    try:
+                        print("Running: docker compose up -d")
+                        subprocess.run(shlex.split("docker compose up -d"), check=True)
+                    except subprocess.CalledProcessError as exc:
+                        print(f"docker compose failed: {exc}")
+                        raise
+
+                # 2) alembic upgrade head
+                if not getattr(args, "no_migrate", False):
+                    try:
+                        print("Running: alembic upgrade head")
+                        subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], check=True)
+                    except subprocess.CalledProcessError as exc:
+                        print(f"alembic upgrade failed: {exc}")
+                        raise
+
+                # 3) start uvicorn app.main:app
+                web_cmd = [
+                    sys.executable,
+                    "-m",
+                    "uvicorn",
+                    "app.main:app",
+                    "--host",
+                    args.web_host,
+                    "--port",
+                    str(args.web_port),
+                ]
+                uvicorn_proc = subprocess.Popen(web_cmd)
+
+                # 4) npm run build (fire-and-forget; wait for it to complete)
+                if not getattr(args, "no_npm_build", False):
+                    try:
+                        print("Running: npm run build")
+                        # run in project root where package.json should exist; shell used for cross-platform
+                        subprocess.run(shlex.split("npm run build"), check=True)
+                    except subprocess.CalledProcessError as exc:
+                        print(f"npm run build failed: {exc}")
+                        # stop uvicorn if build fails
+                        uvicorn_proc.terminate()
+                        raise
+
+                # wait for uvicorn to exit (blocks until server stops)
+                uvicorn_proc.wait()
+                return
+
             start_cluster(
                 StartOptions(
                     head=args.head,
