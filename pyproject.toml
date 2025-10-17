@@ -50,6 +50,8 @@ chatbot = [
     "alembic==1.15.1",
     "sqlmodel>=0.0.25",
     "sqlalchemy>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "psycopg2-binary==2.9.10",
 ]
 
 [tool.setuptools.packages.find]

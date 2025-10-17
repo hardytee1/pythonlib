@@ -123,13 +123,19 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 ]
                 uvicorn_proc = subprocess.Popen(web_cmd)
 
-                # 4) npm run build (fire-and-forget; wait for it to complete)
+                # 4) npm install && npm run build (execute from web/ if available)
                 if not getattr(args, "no_npm_build", False):
                     try:
-                        print(f"Running: npm run build (cwd={web_cwd})")
-                        subprocess.run(shlex.split("npm run build"), check=True, cwd=str(web_cwd))
+                        frontend_dir = web_cwd / "web"
+                        npm_cwd = frontend_dir if frontend_dir.exists() and frontend_dir.is_dir() else web_cwd
+
+                        print(f"Running: npm install (cwd={npm_cwd})")
+                        subprocess.run(shlex.split("npm install"), check=True, cwd=str(npm_cwd))
+
+                        print(f"Running: npm run build (cwd={npm_cwd})")
+                        subprocess.run(shlex.split("npm run build"), check=True, cwd=str(npm_cwd))
                     except subprocess.CalledProcessError as exc:
-                        print(f"npm run build failed: {exc}")
+                        print(f"npm build workflow failed: {exc}")
                         # stop uvicorn if build fails
                         uvicorn_proc.terminate()
                         raise
