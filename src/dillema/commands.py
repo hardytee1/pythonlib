@@ -81,12 +81,13 @@ def deploy_model(
 ) -> None:
     """Deploy an LLM using Ray Serve with sensible defaults."""
 
-    try:
-        from ray import serve
-        from ray.serve.llm import LLMConfig, build_openai_app
-    except ImportError as exc:  # pragma: no cover - dependency missing
-        raise RuntimeError("Ray Serve is required. Install the 'ray[serve]' extra.") from exc
+    # try:
+        
+    # except ImportError as exc:  # pragma: no cover - dependency missing
+    #     raise RuntimeError("Ray Serve is required. Install the 'ray[serve]' extra.") from exc
 
+    from ray import serve
+    from ray.serve.llm import LLMConfig, build_openai_app
     inferred_id = model_id or _derive_model_id(model_source)
     env_vars: Dict[str, str] = {"VLLM_USE_V1": "1"}
     if runtime_interface:
