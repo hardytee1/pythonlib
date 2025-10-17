@@ -90,9 +90,12 @@ def deploy_model(
     from ray.serve.llm import LLMConfig, build_openai_app
     inferred_id = model_id or _derive_model_id(model_source)
     env_vars: Dict[str, str] = {"VLLM_USE_V1": "1"}
-    if runtime_interface:
-        env_vars["GLOO_SOCKET_IFNAME"] = runtime_interface
-        env_vars["NCCL_SOCKET_IFNAME"] = runtime_interface
+
+    env_vars["GLOO_SOCKET_IFNAME"] = "enp132s0"
+    env_vars["NCCL_SOCKET_IFNAME"] = "enp132s0"
+    # if runtime_interface:
+    #     env_vars["GLOO_SOCKET_IFNAME"] = runtime_interface
+    #     env_vars["NCCL_SOCKET_IFNAME"] = runtime_interface
 
     serve.start(http_options={"host": http_host, "port": http_port})
 
