@@ -59,20 +59,27 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 import subprocess
                 import shlex
 
-                # 1) docker compose up -d
+                # determine working directory for web app commands. Prefer apps/RAGforge if present
+                from pathlib import Path
+
+                repo_root = Path.cwd()
+                ragforge_dir = repo_root / "apps" / "RAGforge"
+                web_cwd = ragforge_dir if ragforge_dir.exists() and ragforge_dir.is_dir() else repo_root
+
+                # 1) docker compose up -d (run in web_cwd so Dockerfile/docker-compose in apps/RAGforge is used)
                 if not getattr(args, "no_docker", False):
                     try:
-                        print("Running: docker compose up -d")
-                        subprocess.run(shlex.split("docker compose up -d"), check=True)
+                        print(f"Running: docker compose up -d (cwd={web_cwd})")
+                        subprocess.run(shlex.split("docker compose up -d"), check=True, cwd=str(web_cwd))
                     except subprocess.CalledProcessError as exc:
                         print(f"docker compose failed: {exc}")
                         raise
 
-                # 2) alembic upgrade head
+                # 2) alembic upgrade head (run in the same cwd so migrations config is found)
                 if not getattr(args, "no_migrate", False):
                     try:
-                        print("Running: alembic upgrade head")
-                        subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], check=True)
+                        print(f"Running: alembic upgrade head (cwd={web_cwd})")
+                        subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"], check=True, cwd=str(web_cwd))
                     except subprocess.CalledProcessError as exc:
                         print(f"alembic upgrade failed: {exc}")
                         raise
@@ -93,9 +100,8 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 # 4) npm run build (fire-and-forget; wait for it to complete)
                 if not getattr(args, "no_npm_build", False):
                     try:
-                        print("Running: npm run build")
-                        # run in project root where package.json should exist; shell used for cross-platform
-                        subprocess.run(shlex.split("npm run build"), check=True)
+                        print(f"Running: npm run build (cwd={web_cwd})")
+                        subprocess.run(shlex.split("npm run build"), check=True, cwd=str(web_cwd))
                     except subprocess.CalledProcessError as exc:
                         print(f"npm run build failed: {exc}")
                         # stop uvicorn if build fails
