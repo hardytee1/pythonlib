@@ -121,7 +121,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                     "--port",
                     str(args.web_port),
                 ]
-                uvicorn_proc = subprocess.Popen(web_cmd)
+                uvicorn_proc = subprocess.Popen(web_cmd, cwd=str(web_cwd))
 
                 # 4) npm install && npm run build (execute from web/ if available)
                 if not getattr(args, "no_npm_build", False):
