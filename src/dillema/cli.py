@@ -70,7 +70,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
                 if not getattr(args, "no_docker", False):
                     try:
                         print(f"Running: docker compose up -d (cwd={web_cwd})")
-                        subprocess.run(shlex.split("docker compose up -d"), check=True, cwd=str(web_cwd))
+                        subprocess.run(shlex.split("sudo docker compose up -d"), check=True, cwd=str(web_cwd))
                     except subprocess.CalledProcessError as exc:
                         print(f"docker compose failed: {exc}")
                         raise
